@@ -17,7 +17,9 @@ if you have different versions, double check if the output matches your expectat
 
 ## Installation
 copy the the task `commitVersion` and the function `autoincrementVersion` from the `build.gradle` into your app/build.gradle or yourmodulehere/build.gradle
+
 copy `versions.properties` into the same directory
+
 copy the file `pre-commit` into your `.git/hooks/` or paste the line
 `./gradlew commitVersion -Pcommit`
 into the exsisting file
