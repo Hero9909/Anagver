@@ -1,0 +1,81 @@
+task commitVersion {
+
+    if (project.hasProperty("commit")) {
+        print("commiting version")
+        def versionPropsFile = file('version.properties')
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def versionPatchStaged = versionProps['VERSION_PATCH_STAGED'].toInteger()
+        def versionBuildStaged = versionProps['VERSION_BUILD_STAGED'].toInteger()
+        def versionNumberStaged = versionProps['VERSION_NUMBER_STAGED'].toInteger()
+
+        def versionPatch = versionProps['VERSION_PATCH'].toInteger() + versionPatchStaged
+        def versionBuild = versionProps['VERSION_BUILD'].toInteger() + versionBuildStaged
+        def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + versionNumberStaged
+
+        versionProps['VERSION_PATCH_STAGED'] = 0.toString()
+        versionProps['VERSION_BUILD_STAGED'] = 0.toString()
+        versionProps['VERSION_NUMBER_STAGED'] = 0.toString()
+        versionProps['VERSION_PATCH'] = versionPatch.toString()
+        versionProps['VERSION_BUILD'] = versionBuild.toString()
+        versionProps['VERSION_NUMBER'] = versionNumber.toString()
+
+        versionProps.store(versionPropsFile.newWriter(), null)
+    }
+}
+
+def autoincrementVersion() {
+    print("Incrementing version")
+    def versionPropsFile = file('version.properties')
+    def runTasks = gradle.getStartParameter().getTaskRequests().toString()
+
+    def value = 0
+
+    if (runTasks.contains('assemble') || runTasks.contains('assembleRelease') || runTasks.contains('aR')) {
+        value = 1
+    }
+
+    Properties versionProps = new Properties()
+    versionProps.load(new FileInputStream(versionPropsFile))
+
+    def versionPatch = versionProps['VERSION_PATCH_STAGED'].toInteger() + value
+    def versionBuild = versionProps['VERSION_BUILD_STAGED'].toInteger() + 1
+    def versionNumber = versionProps['VERSION_NUMBER_STAGED'].toInteger() + value
+
+    versionProps['VERSION_PATCH_STAGED'] = versionPatch.toString()
+    versionProps['VERSION_BUILD_STAGED'] = versionBuild.toString()
+    versionProps['VERSION_NUMBER_STAGED'] = versionNumber.toString()
+
+    versionProps.store(versionPropsFile.newWriter(), null)
+}
+
+android{
+    // ... snip
+    def versionPropsFile = file('version.properties')
+    if (versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def versionMajor = versionProps['VERSION_MAJOR'].toInteger()
+        def versionMinor = versionProps['VERSION_MINOR'].toInteger()
+        def versionPatch = versionProps['VERSION_PATCH'].toInteger()
+        def versionBuild = versionProps['VERSION_BUILD'].toInteger()
+        def versionNumber = versionProps['VERSION_NUMBER'].toInteger()
+
+        defaultConfig {
+            applicationId "com.application.myapplicationhere"
+            minSdkVersion 23
+            targetSdkVersion 28
+            versionCode versionNumber
+            versionName "${versionMajor}.${versionMinor}.${versionPatch} (${versionBuild})"
+        }
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+    
+    //snip ...
+
+}
