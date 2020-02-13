@@ -22,4 +22,5 @@ copy the file `pre-commit` into your `.git/hooks/` or paste the line
 `./gradlew commitVersion -Pcommit`
 into the exsisting file
 
-
+## Planned
+- improve licensing
